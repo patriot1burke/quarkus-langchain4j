@@ -1,21 +1,32 @@
 package io.quarkiverse.langchain4j.chatscopes.spi;
 
+import java.util.Map;
+
 import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkus.arc.InjectableBean;
 
 public interface ChatScopeStore {
 
     public interface PassivateTransaction {
-        void passivate(ChatScope scope, InjectableBean<?> bean, Object instance);
+        /**
+         * Called for each scope in a hierarchy of parent/child
+         *
+         * @param scope
+         * @param beans
+         */
+        void passivate(ChatScope scope, Map<InjectableBean<?>, Object> beans);
 
         void commit();
 
         void rollback();
     }
 
+    public record PassivatedScope(String id, String route, String parent) {
+    }
+
     PassivateTransaction beginPassivate();
 
-    boolean activate(String chatScopeId);
+    PassivatedScope activate(String chatScopeId);
 
     Object activateBean(ChatScope scope, String beanId, Object instance);
 

@@ -12,28 +12,36 @@ import io.quarkus.arc.Subclass;
 
 public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
     class JsonPassivationTransaction implements PassivateTransaction {
-        Map<String, Map<String, String>> scopes = new HashMap();
+        Map<String, ScopeRepresentation> passivated = new HashMap();
 
         @Override
-        public void passivate(ChatScope scope, InjectableBean<?> bean, Object instance) {
-            Map<String, String> beans = scopes.computeIfAbsent(scope.getId(), k -> new HashMap<>());
+        public void passivate(ChatScope scope, Map<InjectableBean<?>, Object> cdiBeans) {
+            ScopeRepresentation rep = this.passivated.computeIfAbsent(scope.getId(), ScopeRepresentation::new);
+            rep.parent = scope.parent().getId();
+            rep.route = scope.getRoute();
+            Map<String, String> beans = rep.beans;
             String json = null;
-            try {
-                if (instance instanceof Subclass) {
-                    json = JsonPassivation.mapper.writerFor(instance.getClass().getSuperclass()).writeValueAsString(instance);
-                } else {
-                    json = JsonPassivation.mapper.writeValueAsString(instance);
+            for (Map.Entry<InjectableBean<?>, Object> entry : cdiBeans.entrySet()) {
+                InjectableBean<?> bean = entry.getKey();
+                Object instance = entry.getValue();
+                try {
+                    if (instance instanceof Subclass) {
+                        json = JsonPassivation.mapper.writerFor(instance.getClass().getSuperclass())
+                                .writeValueAsString(instance);
+                    } else {
+                        json = JsonPassivation.mapper.writeValueAsString(instance);
 
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                beans.put(bean.getIdentifier(), json);
             }
-            beans.put(bean.getIdentifier(), json);
         }
 
         @Override
         public void commit() {
-            save(scopes);
+            save(passivated);
         }
 
         @Override
@@ -42,18 +50,29 @@ public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
         }
     }
 
-    protected abstract void save(Map<String, Map<String, String>> scopes);
+    public abstract void save(Map<String, ScopeRepresentation> state);
 
     @Override
     public PassivateTransaction beginPassivate() {
         return new JsonPassivationTransaction();
     }
 
-    protected Object activateBean(Object bean, String json) {
+    public Object activateBean(Object bean, String json) {
         try {
             return JsonPassivation.mapper.readerForUpdating(bean).readValue(json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public abstract ScopeRepresentation load(String chatScopeId);
+
+    @Override
+    public PassivatedScope activate(String chatScopeId) {
+        ScopeRepresentation rep = load(chatScopeId);
+        if (rep == null) {
+            return null;
+        }
+        return new PassivatedScope(rep.id, rep.route, rep.parent);
     }
 }

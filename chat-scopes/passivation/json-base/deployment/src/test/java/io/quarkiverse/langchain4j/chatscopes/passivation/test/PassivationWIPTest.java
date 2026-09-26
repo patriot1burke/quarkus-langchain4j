@@ -178,6 +178,12 @@ public class PassivationWIPTest {
         }
 
         @Override
+        public void passivate(ChatScope scope, Map<InjectableBean<?>, Object> beans) {
+            for (Map.Entry<InjectableBean<?>, Object> entry : beans.entrySet()) {
+                passivate(scope, entry.getKey(), entry.getValue());
+            }
+        }
+
         public void passivate(ChatScope scope, InjectableBean<?> bean, Object instance) {
             Map<String, String> beans = scopes.computeIfAbsent(scope.getId(), k -> new HashMap<>());
             try {
@@ -218,8 +224,8 @@ public class PassivationWIPTest {
         }
 
         @Override
-        public boolean activate(String chatScopeId) {
-            return false;
+        public PassivatedScope activate(String chatScopeId) {
+            return null;
         }
 
         @Override

@@ -4,12 +4,7 @@ import static io.quarkus.deployment.annotations.ExecutionTime.RUNTIME_INIT;
 import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTransformation;
@@ -162,6 +157,17 @@ public class ChatScopeProcessor {
                 routes.addAll(Arrays.asList(funqMethod.value().asStringArray()));
             }
             handlers.produce(new ExceptionHandlerBuildItem(routes, className, methodName));
+        }
+    }
+
+    @BuildStep
+    public void chatScopeStore(Optional<ChatScopeStoreBuildItem> store,
+            BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
+
+        if (store.isPresent()) {
+            additionalBeanProducer
+                    .produce(AdditionalBeanBuildItem.builder().addBeanClass(store.get().getStoreClass()).setUnremovable()
+                            .build());
         }
     }
 

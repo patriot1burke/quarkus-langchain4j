@@ -45,6 +45,7 @@ public class ChatScopeManagedContext implements ContextState {
     }
 
     Map<String, ChatScopeImpl> activeScopes = new ConcurrentHashMap<>();
+    public static final String ROUTE = "route";
 
     public class ChatScopeImpl extends CustomContextState implements ChatScope {
         final ChatScopeImpl parent;
@@ -70,7 +71,7 @@ public class ChatScopeManagedContext implements ContextState {
         }
 
         public ChatScopeImpl(ChatScopeImpl parent) {
-            this(parent, parent.route);
+            this(parent, parent.getRoute());
         }
 
         public ChatScopeImpl() {
@@ -178,14 +179,17 @@ public class ChatScopeManagedContext implements ContextState {
         }
     }
 
-    public boolean has(String id) {
-        return activeScopes.containsKey(id);
+    public ChatScopeImpl create(String id, String route, ChatScopeImpl parent) {
+        return new ChatScopeImpl(id, route, parent);
     }
 
     public ChatScopeImpl activate(String id) {
         ChatScopeImpl context = activeScopes.get(id);
         if (context == null) {
-            throw new ContextNotActiveException();
+            context = ChatScopeStoreManager.activate(id);
+            if (context == null) {
+                throw new ContextNotActiveException();
+            }
         }
         currentScope.set(context);
         fireEvent(new ChatScopeActivated(context));
@@ -201,6 +205,12 @@ public class ChatScopeManagedContext implements ContextState {
     }
 
     public void deactivate(ChatScope current) {
+        currentScope.remove();
+        ChatScopeStoreManager.passivate(current);
+        fireEvent(new ChatScopeDeactivated(current));
+    }
+
+    private void pushDeactivate(ChatScope current) {
         currentScope.remove();
         fireEvent(new ChatScopeDeactivated(current));
     }
@@ -244,7 +254,7 @@ public class ChatScopeManagedContext implements ContextState {
         if (current == null) {
             context = new ChatScopeImpl();
         } else {
-            deactivate(current);
+            pushDeactivate(current);
             context = current.nest();
         }
         currentScope.set(context);
@@ -259,7 +269,7 @@ public class ChatScopeManagedContext implements ContextState {
         if (current == null) {
             context = new ChatScopeImpl(route);
         } else {
-            deactivate(current);
+            pushDeactivate(current);
             context = current.nest(route);
         }
         currentScope.set(context);
@@ -273,7 +283,7 @@ public class ChatScopeManagedContext implements ContextState {
         if (current == null) {
             throw new ContextNotActiveException();
         }
-        current.route = route;
+        current.setRoute(route);
     }
 
     public void pop() {
