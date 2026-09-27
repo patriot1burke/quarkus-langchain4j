@@ -1,9 +1,13 @@
 package io.quarkiverse.langchain4j.chatscopes.passivation.deployment;
 
+import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
+
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
+import io.quarkiverse.langchain4j.chatscopes.passivation.JsonPassivationRecorder;
 import io.quarkus.arc.deployment.BeanDiscoveryFinishedBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
+import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveHierarchyBuildItem;
 
 public class BaseJsonPassivationProcessor {
@@ -15,4 +19,11 @@ public class BaseJsonPassivationProcessor {
             reflect.produce(ReflectiveHierarchyBuildItem.builder(bean.getBeanClass()).build());
         });
     }
+
+    @BuildStep
+    @Record(STATIC_INIT)
+    public void mapper(JsonPassivationRecorder json) {
+        json.initMapper();
+    }
+
 }

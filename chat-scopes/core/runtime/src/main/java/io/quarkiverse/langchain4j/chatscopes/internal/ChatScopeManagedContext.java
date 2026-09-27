@@ -168,6 +168,11 @@ public class ChatScopeManagedContext implements ContextState {
             lock.lock();
             try {
                 activeScopes.remove(getId());
+                try {
+                    ChatScopeStoreManager.destroy(this);
+                } catch (Exception ex) {
+                    log.warn("Failed to destroy chat scope: " + getId(), ex);
+                }
                 children.forEach(ChatScopeImpl::destroy);
                 children.clear();
                 super.destroy();
@@ -318,6 +323,11 @@ public class ChatScopeManagedContext implements ContextState {
             return;
         }
         scope.destroy();
+    }
+
+    // really only used for testing passivation
+    public void clear() {
+        activeScopes.clear();
     }
 
 }

@@ -17,7 +17,7 @@ public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
         @Override
         public void passivate(ChatScope scope, Map<InjectableBean<?>, Object> cdiBeans) {
             ScopeRepresentation rep = this.passivated.computeIfAbsent(scope.getId(), ScopeRepresentation::new);
-            rep.parent = scope.parent().getId();
+            rep.parent = scope.parent() == null ? null : scope.parent().getId();
             rep.route = scope.getRoute();
             Map<String, String> beans = rep.beans;
             String json = null;
