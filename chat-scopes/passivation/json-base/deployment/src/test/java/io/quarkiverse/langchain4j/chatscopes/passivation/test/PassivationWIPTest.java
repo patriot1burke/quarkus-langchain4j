@@ -43,6 +43,7 @@ import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkiverse.langchain4j.chatscopes.internal.ChatScopeStoreManager;
 import io.quarkiverse.langchain4j.chatscopes.spi.ChatScopeStore;
+import io.quarkus.arc.ClientProxy;
 import io.quarkus.arc.InjectableBean;
 import io.quarkus.arc.Subclass;
 import io.quarkus.arc.Unremovable;
@@ -93,6 +94,7 @@ public class PassivationWIPTest {
     public static class MyInterceptor {
         @AroundInvoke
         public Object intercept(InvocationContext ctx) throws Exception {
+            System.out.println("Interceptor called: ");
             return ctx.proceed();
         }
     }
@@ -115,7 +117,7 @@ public class PassivationWIPTest {
 
         @Override
         public String helloWorld() {
-            System.out.println("Decorated call");
+            System.out.println("Decorated called: next" + delegate.getClass().getName());
             return delegate.helloWorld();
         }
     }
@@ -128,12 +130,15 @@ public class PassivationWIPTest {
         String val = "myField";
 
         public ChatBean() {
-            printFields(this);
         }
 
         @Override
         @MyInterceptorBinding
         public String helloWorld() {
+            printFields(this);
+
+            new Exception("STACK TRACE").printStackTrace();
+            System.out.println("returning hellow world");
             return "Hello World";
         }
 
@@ -243,6 +248,7 @@ public class PassivationWIPTest {
     public void test() {
         System.out.println("--------------- CHAT SCOPE PASSIVATION --------------");
         ChatScope.begin();
+        System.out.println(">>>> INJECTED " + ClientProxy.unwrap(chatBean).getClass().getName());
         chatBean.helloWorld();
         ChatScopeStoreManager.passivate(ChatScope.current());
         ChatScope.end();

@@ -110,7 +110,6 @@ public abstract class CustomInjectableContext implements InjectableContext {
 
     protected <T> T createInstance(InjectableBean<T> contextual, CreationalContext<T> creationalContext) {
         T createdInstance = contextual.create(creationalContext);
-        //printDependents(creationalContext);
         return createdInstance;
     }
 
@@ -124,7 +123,7 @@ public abstract class CustomInjectableContext implements InjectableContext {
         }
     }
 
-    private static <T> void printDependents(CreationalContext creationalContext) {
+    public static <T> void printDependents(CreationalContext creationalContext) {
         CreationalContextImpl impl = (CreationalContextImpl) creationalContext;
         System.out.println("Class name of creational context: " + impl.getClass().getName());
         Contextual<T> contextual = getField(creationalContext, "contextual");

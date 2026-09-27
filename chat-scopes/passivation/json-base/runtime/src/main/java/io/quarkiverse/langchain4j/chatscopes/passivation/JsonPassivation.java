@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.service.memory.ChatMemoryAccess;
@@ -19,6 +21,7 @@ public class JsonPassivation {
         ignoredClasses.add(ClientProxy.class);
         ignoredClasses.add(ChatMemoryAccess.class);
         ignoredClasses.add(InterceptedMethodMetadata.class);
+        ignoredAnnotations.add(ConfigProperty.class);
     }
 
 }

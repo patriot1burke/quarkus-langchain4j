@@ -24,6 +24,7 @@ public abstract class BaseChatScopeInjectableContext extends CustomInjectableCon
     @Override
     protected <T> T createInstance(InjectableBean<T> contextual, CreationalContext<T> creationalContext) {
         T createdInstance = contextual.create(creationalContext);
+        //printDependents(creationalContext);
         return (T) ChatScopeStoreManager.activateBean(state(), contextual.getIdentifier(), createdInstance);
     }
 }

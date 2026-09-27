@@ -1,7 +1,9 @@
 package io.quarkiverse.langchain4j.chatscopes.passivation.test;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.ContextNotActiveException;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -19,11 +21,52 @@ public class PassivationTest {
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(
                     () -> ShrinkWrap.create(JavaArchive.class).addClasses(
-                            ScopedCounterBean.class));
+                            CounterBean.class, AppScopedCounter.class, SingletonCounter.class));
+
+    @Singleton
+    public static class SingletonCounter {
+        private int number = 0;
+
+        public int getNumber() {
+            return number;
+        }
+
+        public void increment() {
+            number++;
+        }
+
+        public void clear() {
+            number = 0;
+        }
+
+    }
+
+    @ApplicationScoped
+    public static class AppScopedCounter {
+        private int number = 0;
+
+        public int getNumber() {
+            return number;
+        }
+
+        public void increment() {
+            number++;
+        }
+
+        public void clear() {
+            number = 0;
+        }
+    }
 
     @ChatScoped
-    public static class ScopedCounterBean {
+    public static class CounterBean {
         private int counter = 0;
+
+        @Inject
+        AppScopedCounter appScopedCounter;
+
+        @Inject
+        SingletonCounter singletonCounter;
 
         public void increment() {
             counter++;
@@ -32,24 +75,47 @@ public class PassivationTest {
         public int getCounter() {
             return counter;
         }
+
+        public int getAppScopedCounter() {
+            return appScopedCounter.getNumber();
+        }
+
+        public int getSingletonCounter() {
+            return singletonCounter.getNumber();
+        }
     }
 
     @Inject
-    ScopedCounterBean scopedCounterBean;
+    CounterBean counterBean;
+
+    @Inject
+    AppScopedCounter appScopedCounter;
+
+    @Inject
+    SingletonCounter singletonCounter;
 
     @Test
     public void testPassivation() throws Exception {
         ChatScope.begin();
         String id = ChatScope.id();
-        Assertions.assertEquals(0, scopedCounterBean.getCounter());
-        scopedCounterBean.increment();
-        Assertions.assertEquals(1, scopedCounterBean.getCounter());
+        Assertions.assertEquals(0, counterBean.getCounter());
+        counterBean.increment();
+        appScopedCounter.increment();
+        singletonCounter.increment();
+        Assertions.assertEquals(1, counterBean.getCounter());
+        Assertions.assertEquals(1, counterBean.getAppScopedCounter());
+        Assertions.assertEquals(1, counterBean.getSingletonCounter());
         ChatScope.deactivate();
 
         ChatScopeManagedContext.INSTANCE.clear();
+        appScopedCounter.clear();
+        singletonCounter.clear();
 
         ChatScope.activate(id);
-        Assertions.assertEquals(1, scopedCounterBean.getCounter());
+        Assertions.assertEquals(1, counterBean.getCounter());
+        // make sure singleton and app scoped beans are not passivated and that proxy still works
+        Assertions.assertEquals(0, counterBean.getAppScopedCounter());
+        Assertions.assertEquals(0, counterBean.getSingletonCounter());
         ChatScope.end();
 
         try {
