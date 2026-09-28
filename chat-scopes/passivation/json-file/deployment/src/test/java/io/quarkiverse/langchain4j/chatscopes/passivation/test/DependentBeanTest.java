@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkiverse.langchain4j.chatscopes.internal.ChatScopeManagedContext;
-import io.quarkiverse.langchain4j.chatscopes.passivation.Passivate;
 import io.quarkus.test.QuarkusUnitTest;
 
 public class DependentBeanTest {
@@ -56,10 +55,6 @@ public class DependentBeanTest {
         @Inject
         NestedCounter nested;
 
-        @Inject
-        @Passivate
-        NestedCounter passivated;
-
         public int getNumber() {
             return number;
         }
@@ -70,10 +65,6 @@ public class DependentBeanTest {
 
         public NestedCounter nested() {
             return nested;
-        }
-
-        public NestedCounter passivated() {
-            return passivated;
         }
 
         @Plus1000
@@ -100,7 +91,6 @@ public class DependentBeanTest {
         private int counter = 0;
 
         @Inject
-        @Passivate
         DependentCounter dependentCounter;
 
         public void increment() {
@@ -127,12 +117,10 @@ public class DependentBeanTest {
         counterBean.increment();
         counterBean.dependent().increment();
         counterBean.dependent().nested().increment();
-        counterBean.dependent().passivated().increment();
         Assertions.assertEquals(1, counterBean.getCounter());
         Assertions.assertEquals(1, counterBean.dependent().getNumber());
         Assertions.assertEquals(1001, counterBean.dependent().intercepted());
         Assertions.assertEquals(1, counterBean.dependent().nested().getNumber());
-        Assertions.assertEquals(1, counterBean.dependent().passivated().getNumber());
         ChatScope.deactivate();
 
         ChatScopeManagedContext.INSTANCE.clear();
@@ -141,8 +129,7 @@ public class DependentBeanTest {
         Assertions.assertEquals(1, counterBean.getCounter());
         Assertions.assertEquals(1, counterBean.dependent().getNumber());
         Assertions.assertEquals(1001, counterBean.dependent().intercepted());
-        Assertions.assertEquals(0, counterBean.dependent().nested().getNumber());
-        Assertions.assertEquals(1, counterBean.dependent().passivated().getNumber());
+        Assertions.assertEquals(1, counterBean.dependent().nested().getNumber());
         ChatScope.end();
 
         try {

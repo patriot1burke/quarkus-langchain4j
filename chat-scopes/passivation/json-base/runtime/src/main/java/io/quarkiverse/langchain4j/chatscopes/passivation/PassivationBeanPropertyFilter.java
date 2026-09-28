@@ -3,6 +3,7 @@ package io.quarkiverse.langchain4j.chatscopes.passivation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Qualifier;
 
@@ -38,11 +39,18 @@ public class PassivationBeanPropertyFilter implements PropertyFilter {
                     return;
                 }
             }
-            if (annotatedElement.isAnnotationPresent(Inject.class)) {
-                return;
-            }
+            boolean injected = annotatedElement.isAnnotationPresent(Inject.class);
             for (Annotation annotation : annotatedElement.getAnnotations()) {
                 if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+                    injected = true;
+                }
+            }
+            if (injected) {
+                Class targetClass = target.getClass();
+                if (target instanceof Subclass) {
+                    targetClass = targetClass.getSuperclass();
+                }
+                if (!targetClass.isAnnotationPresent(Dependent.class)) {
                     return;
                 }
             }
