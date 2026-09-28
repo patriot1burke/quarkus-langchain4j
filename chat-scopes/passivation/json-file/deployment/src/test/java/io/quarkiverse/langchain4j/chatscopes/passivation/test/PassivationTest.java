@@ -76,12 +76,12 @@ public class PassivationTest {
             return counter;
         }
 
-        public int getAppScopedCounter() {
-            return appScopedCounter.getNumber();
+        public AppScopedCounter app() {
+            return appScopedCounter;
         }
 
-        public int getSingletonCounter() {
-            return singletonCounter.getNumber();
+        public SingletonCounter singleton() {
+            return singletonCounter;
         }
     }
 
@@ -103,8 +103,8 @@ public class PassivationTest {
         appScopedCounter.increment();
         singletonCounter.increment();
         Assertions.assertEquals(1, counterBean.getCounter());
-        Assertions.assertEquals(1, counterBean.getAppScopedCounter());
-        Assertions.assertEquals(1, counterBean.getSingletonCounter());
+        Assertions.assertEquals(1, counterBean.app().getNumber());
+        Assertions.assertEquals(1, counterBean.singleton().getNumber());
         ChatScope.deactivate();
 
         ChatScopeManagedContext.INSTANCE.clear();
@@ -114,8 +114,8 @@ public class PassivationTest {
         ChatScope.activate(id);
         Assertions.assertEquals(1, counterBean.getCounter());
         // make sure singleton and app scoped beans are not passivated and that proxy still works
-        Assertions.assertEquals(0, counterBean.getAppScopedCounter());
-        Assertions.assertEquals(0, counterBean.getSingletonCounter());
+        Assertions.assertEquals(0, counterBean.app().getNumber());
+        Assertions.assertEquals(0, counterBean.singleton().getNumber());
         ChatScope.end();
 
         try {

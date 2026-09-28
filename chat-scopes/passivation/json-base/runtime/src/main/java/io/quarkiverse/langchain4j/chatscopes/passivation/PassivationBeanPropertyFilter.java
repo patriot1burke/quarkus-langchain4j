@@ -8,6 +8,7 @@ import jakarta.inject.Qualifier;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,7 +49,9 @@ public class PassivationBeanPropertyFilter implements PropertyFilter {
         }
         if (target instanceof Subclass) {
             Class superClass = target.getClass().getSuperclass();
-            prov.findValueSerializer(superClass, writer).serialize(target, gen, prov);
+            gen.writeFieldName(writer.getName());
+            JsonSerializer<Object> valueSerializer = prov.findValueSerializer(superClass, writer);
+            valueSerializer.serialize(target, gen, prov);
         } else {
             writer.serializeAsField(pojo, gen, prov);
         }
