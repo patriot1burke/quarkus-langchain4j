@@ -109,6 +109,23 @@ public class PassivationWIPTest {
     }
 
     @Decorator
+    public static class AnotherDecorator implements Chat {
+        @Inject
+        @Delegate
+        Chat delegate;
+
+        @Override
+        public String helloWorld() {
+            System.out.println("Decorated called: next" + delegate.getClass().getName());
+            System.out.println("----> THIS");
+            printFields(this);
+            System.out.println("----> DELEGATE");
+            printFields(delegate);
+            return delegate.helloWorld();
+        }
+    }
+
+    @Decorator
     public static class ChatDecorator implements Chat {
 
         @Inject
@@ -118,6 +135,10 @@ public class PassivationWIPTest {
         @Override
         public String helloWorld() {
             System.out.println("Decorated called: next" + delegate.getClass().getName());
+            System.out.println("----> THIS");
+            printFields(this);
+            System.out.println("----> DELEGATE");
+            printFields(delegate);
             return delegate.helloWorld();
         }
     }
@@ -133,7 +154,7 @@ public class PassivationWIPTest {
         }
 
         @Override
-        @MyInterceptorBinding
+        //@MyInterceptorBinding
         public String helloWorld() {
             printFields(this);
 
