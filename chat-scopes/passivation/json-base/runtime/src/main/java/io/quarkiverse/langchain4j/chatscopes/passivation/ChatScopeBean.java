@@ -4,5 +4,4 @@ import java.util.Map;
 
 public class ChatScopeBean {
     public String data;
-    public Map<String, String> decorators;
 }
