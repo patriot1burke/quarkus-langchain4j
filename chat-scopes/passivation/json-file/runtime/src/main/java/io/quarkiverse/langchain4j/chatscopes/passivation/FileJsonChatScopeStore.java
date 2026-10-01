@@ -33,12 +33,13 @@ public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implement
         }
     }
 
-    ConcurrentHashMap<String, ScopeRepresentation> chatScopeEntries = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, ChatScopeRepresentation> chatScopeEntries = new ConcurrentHashMap<>();
 
     @Override
-    public void save(Map<String, ScopeRepresentation> scopes) {
-        for (Map.Entry<String, ScopeRepresentation> entry : scopes.entrySet()) {
-            ScopeRepresentation chatScopeEntry = chatScopeEntries.computeIfAbsent(entry.getKey(), ScopeRepresentation::new);
+    public void save(Map<String, ChatScopeRepresentation> scopes) {
+        for (Map.Entry<String, ChatScopeRepresentation> entry : scopes.entrySet()) {
+            ChatScopeRepresentation chatScopeEntry = chatScopeEntries.computeIfAbsent(entry.getKey(),
+                    ChatScopeRepresentation::new);
             synchronized (chatScopeEntry) {
                 chatScopeEntry.parent = entry.getValue().parent;
                 chatScopeEntry.route = entry.getValue().route;
@@ -58,7 +59,7 @@ public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implement
     }
 
     @Override
-    public ScopeRepresentation load(String chatScopeId) {
+    public ChatScopeRepresentation load(String chatScopeId) {
         if (chatScopeEntries.containsKey(chatScopeId)) {
             return chatScopeEntries.get(chatScopeId);
         }
@@ -67,9 +68,10 @@ public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implement
             return null;
         }
 
-        ScopeRepresentation entry = chatScopeEntries.computeIfAbsent(chatScopeId, id -> {
+        ChatScopeRepresentation entry = chatScopeEntries.computeIfAbsent(chatScopeId, id -> {
             try {
-                ScopeRepresentation chatScopeEntry = mapper.readValue(chatScopePath.toFile(), ScopeRepresentation.class);
+                ChatScopeRepresentation chatScopeEntry = mapper.readValue(chatScopePath.toFile(),
+                        ChatScopeRepresentation.class);
                 chatScopeEntries.put(id, chatScopeEntry);
                 return chatScopeEntry;
             } catch (IOException e) {
@@ -81,15 +83,15 @@ public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implement
 
     @Override
     public Object activateBean(ChatScope scope, String beanId, Object instance) {
-        ScopeRepresentation chatScopeEntry = chatScopeEntries.get(scope.getId());
+        ChatScopeRepresentation chatScopeEntry = chatScopeEntries.get(scope.getId());
         if (chatScopeEntry == null) {
             return instance;
         }
-        String json = chatScopeEntry.beans.get(beanId);
-        if (json == null) {
+        ChatScopeBean bean = chatScopeEntry.beans.get(beanId);
+        if (bean == null) {
             return instance;
         }
-        return activateBean(instance, json);
+        return activateBean(instance, bean);
     }
 
     @Override

@@ -19,12 +19,9 @@ public class BaseJsonPassivationProcessor {
             reflect.produce(ReflectiveHierarchyBuildItem.builder(bean.getBeanClass()).build());
             boolean hasSubclass = !bean.getBoundDecorators().isEmpty() || !bean.getBoundInterceptors().isEmpty();
 
-            /*
             for (var decorator : bean.getBoundDecorators()) {
                 reflect.produce(ReflectiveHierarchyBuildItem.builder(decorator.getBeanClass()).build());
             }
-
-             */
 
             if (hasSubclass) {
                 reflect.produce(ReflectiveHierarchyBuildItem.builder(bean.getBeanClass().toString() + "_Subclass").build());

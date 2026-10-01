@@ -27,6 +27,7 @@ public class JsonPassivationRecorder {
                 .setFailOnUnknownId(false);
         JsonPassivation.mapper.setFilterProvider(filterProvider);
         JsonPassivation.mapper.setDefaultMergeable(true);
+        JsonPassivation.mapper.addHandler(new BeanDeserializationHandler());
         // hack to force filter to run on every serialization
         JsonPassivation.mapper.addMixIn(Object.class, PassivationFilterMixIn.class);
     }
