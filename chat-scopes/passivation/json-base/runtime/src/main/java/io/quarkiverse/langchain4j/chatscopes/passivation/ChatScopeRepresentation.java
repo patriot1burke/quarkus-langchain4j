@@ -7,7 +7,7 @@ public class ChatScopeRepresentation {
     public String id;
     public String parent;
     public String route;
-    public Map<String, ChatScopeBean> beans = new HashMap<>();
+    public Map<String, String> beans = new HashMap<>();
 
     public ChatScopeRepresentation() {
     }

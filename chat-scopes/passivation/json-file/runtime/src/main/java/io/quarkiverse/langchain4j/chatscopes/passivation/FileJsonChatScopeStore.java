@@ -87,7 +87,7 @@ public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implement
         if (chatScopeEntry == null) {
             return instance;
         }
-        ChatScopeBean bean = chatScopeEntry.beans.get(beanId);
+        String bean = chatScopeEntry.beans.get(beanId);
         if (bean == null) {
             return instance;
         }

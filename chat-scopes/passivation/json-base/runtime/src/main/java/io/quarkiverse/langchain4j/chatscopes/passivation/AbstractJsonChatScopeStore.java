@@ -64,17 +64,17 @@ public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
             ChatScopeRepresentation rep = this.passivated.computeIfAbsent(scope.getId(), ChatScopeRepresentation::new);
             rep.parent = scope.parent() == null ? null : scope.parent().getId();
             rep.route = scope.getRoute();
-            Map<String, ChatScopeBean> beans = rep.beans;
+            Map<String, String> beans = rep.beans;
             for (Map.Entry<InjectableBean<?>, Object> entry : cdiBeans.entrySet()) {
                 InjectableBean<?> bean = entry.getKey();
-                ChatScopeBean beanRep = new ChatScopeBean();
                 Object instance = entry.getValue();
+                String json = null;
                 try {
-                    beanRep.data = JsonPassivation.mapper.writeValueAsString(instance);
+                    json = JsonPassivation.mapper.writeValueAsString(instance);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                beans.put(bean.getIdentifier(), beanRep);
+                beans.put(bean.getIdentifier(), json);
             }
         }
 
@@ -96,9 +96,9 @@ public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
         return new JsonPassivationTransaction();
     }
 
-    public Object activateBean(Object bean, ChatScopeBean beanRep) {
+    public Object activateBean(Object bean, String json) {
         try {
-            Object instance = JsonPassivation.mapper.readerForUpdating(bean).readValue(beanRep.data);
+            Object instance = JsonPassivation.mapper.readerForUpdating(bean).readValue(json);
             return instance;
         } catch (Exception e) {
             throw new RuntimeException(e);
