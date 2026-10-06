@@ -7,14 +7,13 @@
     <version>999-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
-  <artifactId>quarkus-chat-scopes-passivation-parent</artifactId>
-  <name>Quarkus - Chat Scopes Passivation - Parent</name>
+  <artifactId>quarkus-chat-scopes-passivation-json-redis-parent</artifactId>
+  <name>Quarkus - Chat Scopes Passivation JSON Redis - Parent</name>
   <packaging>pom</packaging>
 
   <modules>
-    <module>json-base</module>
-    <module>json-file</module>
-    <module>json-redis</module>
+    <module>runtime</module>
+    <module>deployment</module>
   </modules>
 
 
