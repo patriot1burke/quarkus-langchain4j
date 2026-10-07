@@ -8,8 +8,8 @@
         <relativePath>../../../pom.xml</relativePath>
         <version>999-SNAPSHOT</version>
     </parent>
-    <artifactId>quarkus-chat-scopes-passivation-json-redis</artifactId>
-    <name>Quarkus - Chat Scopes Passivation JSON Redis</name>
+    <artifactId>quarkus-chat-scopes-passivation-redis</artifactId>
+    <name>Quarkus - Chat Scopes Passivation Redis</name>
     <dependencies>
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>

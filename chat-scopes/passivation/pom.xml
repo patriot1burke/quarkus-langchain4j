@@ -15,6 +15,7 @@
     <module>json-base</module>
     <module>json-file</module>
     <module>json-redis</module>
+    <module>json-mongo</module>
   </modules>
 
 

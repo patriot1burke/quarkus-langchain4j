@@ -25,7 +25,7 @@ public class RedisJsonProcessor {
     public static final DotName REDIS_JSON_CHAT_SCOPE_STORE = DotName.createSimple(RedisJsonChatScopeStore.class);
 
     @BuildStep
-    public RequestedRedisClientBuildItem requestRedisClient(RedisChatScopesStoreBuildTimeConfig config) {
+    public RequestedRedisClientBuildItem requestRedisClient(RedisChatScopeStoreBuildTimeConfig config) {
         return new RequestedRedisClientBuildItem(config.clientName().orElse(RedisConfig.DEFAULT_CLIENT_NAME));
     }
 
@@ -35,7 +35,7 @@ public class RedisJsonProcessor {
             BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
             BuildProducer<SyntheticBeanBuildItem> beanProducer,
             RedisJsonChatScopeStoreRecorder recorder,
-            RedisChatScopesStoreBuildTimeConfig config) {
+            RedisChatScopeStoreBuildTimeConfig config) {
         String clientName = config.clientName().orElse(null);
         AnnotationInstance redisClientQualifier;
         if (clientName == null) {
@@ -52,7 +52,7 @@ public class RedisJsonProcessor {
                 .scope(ApplicationScoped.class)
                 .addInjectionPoint(ClassType.create(DotName.createSimple(RedisDataSource.class)),
                         redisClientQualifier)
-                .createWith(recorder.chatMemoryStoreFunction(clientName))
+                .createWith(recorder.chatStoreFunction(clientName))
                 .unremovable()
                 .done());
     }

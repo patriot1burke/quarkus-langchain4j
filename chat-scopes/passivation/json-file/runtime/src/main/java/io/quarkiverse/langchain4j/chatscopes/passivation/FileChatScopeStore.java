@@ -17,8 +17,8 @@ import io.quarkiverse.langchain4j.chatscopes.spi.ChatScopeStore;
 import io.quarkus.runtime.Startup;
 
 @ApplicationScoped
-public class FileJsonChatScopeStore extends AbstractJsonChatScopeStore implements ChatScopeStore {
-    @ConfigProperty(name = "quarkiverse.langchain4j.chatscopes.passivation.json.path", defaultValue = "/tmp/chatscopes")
+public class FileChatScopeStore extends AbstractJsonChatScopeStore implements ChatScopeStore {
+    @ConfigProperty(name = "quarkiverse.langchain4j.chatscopes.passivation.file.path", defaultValue = "/tmp/chatscopes")
     String path;
 
     Path dir;

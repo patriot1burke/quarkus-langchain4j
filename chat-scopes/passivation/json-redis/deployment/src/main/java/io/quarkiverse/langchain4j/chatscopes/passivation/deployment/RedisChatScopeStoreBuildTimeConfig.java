@@ -9,7 +9,7 @@ import io.smallrye.config.ConfigMapping;
 
 @ConfigRoot(phase = BUILD_TIME)
 @ConfigMapping(prefix = "quarkus.langchain4j.chatscopes.store.redis")
-public interface RedisChatScopesStoreBuildTimeConfig {
+public interface RedisChatScopeStoreBuildTimeConfig {
 
     /**
      * The name of the Redis client to use. These clients are configured by means of the `redis-client` extension.

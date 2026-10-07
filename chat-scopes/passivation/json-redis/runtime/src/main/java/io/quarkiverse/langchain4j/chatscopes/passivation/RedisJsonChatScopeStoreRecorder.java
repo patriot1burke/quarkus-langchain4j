@@ -11,7 +11,7 @@ import io.quarkus.runtime.annotations.Recorder;
 
 @Recorder
 public class RedisJsonChatScopeStoreRecorder {
-    public Function<SyntheticCreationalContext<RedisJsonChatScopeStore>, RedisJsonChatScopeStore> chatMemoryStoreFunction(
+    public Function<SyntheticCreationalContext<RedisJsonChatScopeStore>, RedisJsonChatScopeStore> chatStoreFunction(
             String clientName) {
         return new Function<>() {
             @Override

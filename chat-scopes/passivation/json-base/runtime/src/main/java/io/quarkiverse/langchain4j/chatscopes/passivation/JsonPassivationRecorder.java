@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
@@ -30,6 +31,7 @@ public class JsonPassivationRecorder {
         JsonPassivation.mapper.addHandler(new BeanDeserializationHandler());
         // hack to force filter to run on every serialization
         JsonPassivation.mapper.addMixIn(Object.class, PassivationFilterMixIn.class);
+        JsonPassivation.mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
     }
 
     public void ignore(Class<?> clazz) {
