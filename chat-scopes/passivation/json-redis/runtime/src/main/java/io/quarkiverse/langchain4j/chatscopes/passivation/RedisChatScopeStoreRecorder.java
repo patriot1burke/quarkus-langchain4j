@@ -10,12 +10,12 @@ import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.runtime.annotations.Recorder;
 
 @Recorder
-public class RedisJsonChatScopeStoreRecorder {
-    public Function<SyntheticCreationalContext<RedisJsonChatScopeStore>, RedisJsonChatScopeStore> chatStoreFunction(
+public class RedisChatScopeStoreRecorder {
+    public Function<SyntheticCreationalContext<RedisChatScopeStore>, RedisChatScopeStore> chatStoreFunction(
             String clientName) {
         return new Function<>() {
             @Override
-            public RedisJsonChatScopeStore apply(SyntheticCreationalContext<RedisJsonChatScopeStore> context) {
+            public RedisChatScopeStore apply(SyntheticCreationalContext<RedisChatScopeStore> context) {
                 RedisDataSource dataSource;
                 if (clientName == null) {
                     dataSource = context.getInjectedReference(RedisDataSource.class, new Default.Literal());
@@ -23,7 +23,7 @@ public class RedisJsonChatScopeStoreRecorder {
                     dataSource = context.getInjectedReference(RedisDataSource.class,
                             new RedisClientName.Literal(clientName));
                 }
-                return new RedisJsonChatScopeStore(dataSource);
+                return new RedisChatScopeStore(dataSource);
             }
         };
     }

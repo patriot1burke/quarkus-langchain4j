@@ -27,7 +27,7 @@ import io.quarkus.mongodb.deployment.MongoClientBuildTimeConfig;
 import io.quarkus.mongodb.deployment.MongoClientNameBuildItem;
 import io.quarkus.mongodb.deployment.MongoUnremovableClientsBuildItem;
 
-public class MongoProcessor {
+public class MongoPassivationProcessor {
     private static final DotName MONGO_CLIENT = DotName.createSimple(MongoClient.class.getName());
     private static final DotName MONGO_CHAT_SCOPE_STORE = DotName.createSimple(MongoChatScopeStore.class);
 

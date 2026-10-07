@@ -13,11 +13,11 @@ import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.keys.KeyCommands;
 import io.quarkus.redis.datasource.value.ValueCommands;
 
-public class RedisJsonChatScopeStore extends AbstractJsonChatScopeStore implements ChatScopeStore {
+public class RedisChatScopeStore extends AbstractJsonChatScopeStore implements ChatScopeStore {
     private final ValueCommands<String, byte[]> valueCommands;
     private final KeyCommands<String> keyCommands;
 
-    public RedisJsonChatScopeStore(RedisDataSource redisDataSource) {
+    public RedisChatScopeStore(RedisDataSource redisDataSource) {
         this.valueCommands = redisDataSource.value(new TypeReference<>() {
         });
         this.keyCommands = redisDataSource.key(String.class);

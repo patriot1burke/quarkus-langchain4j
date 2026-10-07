@@ -161,17 +161,6 @@ public class ChatScopeProcessor {
     }
 
     @BuildStep
-    public void chatScopeStore(Optional<ChatScopeStoreBuildItem> store,
-            BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer) {
-
-        if (store.isPresent()) {
-            additionalBeanProducer
-                    .produce(AdditionalBeanBuildItem.builder().addBeanClass(store.get().getStoreClass()).setUnremovable()
-                            .build());
-        }
-    }
-
-    @BuildStep
     public void collectChatRoutes(BuildProducer<ChatRouteBuildItem> chatRouteProducer,
             CombinedIndexBuildItem combinedIndexBuildItem,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClass,

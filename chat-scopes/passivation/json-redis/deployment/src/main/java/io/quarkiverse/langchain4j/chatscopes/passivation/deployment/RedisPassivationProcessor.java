@@ -7,8 +7,8 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 
-import io.quarkiverse.langchain4j.chatscopes.passivation.RedisJsonChatScopeStore;
-import io.quarkiverse.langchain4j.chatscopes.passivation.RedisJsonChatScopeStoreRecorder;
+import io.quarkiverse.langchain4j.chatscopes.passivation.RedisChatScopeStore;
+import io.quarkiverse.langchain4j.chatscopes.passivation.RedisChatScopeStoreRecorder;
 import io.quarkiverse.langchain4j.chatscopes.spi.ChatScopeStore;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
@@ -21,8 +21,8 @@ import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.deployment.client.RequestedRedisClientBuildItem;
 import io.quarkus.redis.runtime.client.config.RedisConfig;
 
-public class RedisJsonProcessor {
-    public static final DotName REDIS_JSON_CHAT_SCOPE_STORE = DotName.createSimple(RedisJsonChatScopeStore.class);
+public class RedisPassivationProcessor {
+    public static final DotName REDIS_JSON_CHAT_SCOPE_STORE = DotName.createSimple(RedisChatScopeStore.class);
 
     @BuildStep
     public RequestedRedisClientBuildItem requestRedisClient(RedisChatScopeStoreBuildTimeConfig config) {
@@ -34,7 +34,7 @@ public class RedisJsonProcessor {
     public void createMemoryStoreBean(
             BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
             BuildProducer<SyntheticBeanBuildItem> beanProducer,
-            RedisJsonChatScopeStoreRecorder recorder,
+            RedisChatScopeStoreRecorder recorder,
             RedisChatScopeStoreBuildTimeConfig config) {
         String clientName = config.clientName().orElse(null);
         AnnotationInstance redisClientQualifier;
