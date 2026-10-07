@@ -3,8 +3,6 @@ package io.quarkiverse.langchain4j.chatscopes.passivation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -33,25 +31,10 @@ public class FileChatScopeStore extends AbstractJsonChatScopeStore implements Ch
         }
     }
 
-    ConcurrentHashMap<String, ChatScopeRepresentation> chatScopeEntries = new ConcurrentHashMap<>();
-
     @Override
-    public void save(Map<String, ChatScopeRepresentation> scopes) {
-        for (Map.Entry<String, ChatScopeRepresentation> entry : scopes.entrySet()) {
-            ChatScopeRepresentation chatScopeEntry = chatScopeEntries.computeIfAbsent(entry.getKey(),
-                    ChatScopeRepresentation::new);
-            synchronized (chatScopeEntry) {
-                chatScopeEntry.parent = entry.getValue().parent;
-                chatScopeEntry.route = entry.getValue().route;
-                chatScopeEntry.beans.putAll(entry.getValue().beans);
-                Path chatScopePath = scopePath(entry.getKey());
-                try {
-                    mapper.writeValue(chatScopePath.toFile(), chatScopeEntry);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+    protected void write(ChatScopeRepresentation chatScopeEntry) throws Exception {
+        Path chatScopePath = scopePath(chatScopeEntry.id);
+        mapper.writeValue(chatScopePath.toFile(), chatScopeEntry);
     }
 
     Path scopePath(String id) {
@@ -79,19 +62,6 @@ public class FileChatScopeStore extends AbstractJsonChatScopeStore implements Ch
             }
         });
         return entry;
-    }
-
-    @Override
-    public Object activateBean(ChatScope scope, String beanId, Object instance) {
-        ChatScopeRepresentation chatScopeEntry = chatScopeEntries.get(scope.getId());
-        if (chatScopeEntry == null) {
-            return instance;
-        }
-        String bean = chatScopeEntry.beans.get(beanId);
-        if (bean == null) {
-            return instance;
-        }
-        return activateBean(instance, bean);
     }
 
     @Override

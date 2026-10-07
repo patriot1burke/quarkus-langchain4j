@@ -3,6 +3,7 @@ package io.quarkiverse.langchain4j.chatscopes.passivation;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.decorator.Decorator;
 
@@ -89,17 +90,47 @@ public abstract class AbstractJsonChatScopeStore implements ChatScopeStore {
         }
     }
 
-    public abstract void save(Map<String, ChatScopeRepresentation> state);
+    protected ConcurrentHashMap<String, ChatScopeRepresentation> chatScopeEntries = new ConcurrentHashMap<>();
+
+    public void save(Map<String, ChatScopeRepresentation> scopes) {
+        for (Map.Entry<String, ChatScopeRepresentation> entry : scopes.entrySet()) {
+            ChatScopeRepresentation chatScopeEntry = chatScopeEntries.computeIfAbsent(entry.getKey(),
+                    ChatScopeRepresentation::new);
+            synchronized (chatScopeEntry) {
+                chatScopeEntry.parent = entry.getValue().parent;
+                chatScopeEntry.route = entry.getValue().route;
+                chatScopeEntry.beans.putAll(entry.getValue().beans);
+                try {
+                    write(chatScopeEntry);
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    }
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    protected abstract void write(ChatScopeRepresentation chatScopeEntry) throws Exception;
 
     @Override
     public PassivateTransaction beginPassivate() {
         return new JsonPassivationTransaction();
     }
 
-    public Object activateBean(Object bean, String json) {
-        try {
-            Object instance = JsonPassivation.mapper.readerForUpdating(bean).readValue(json);
+    @Override
+    public Object activateBean(ChatScope scope, String beanId, Object instance) {
+        ChatScopeRepresentation chatScopeEntry = chatScopeEntries.get(scope.getId());
+        if (chatScopeEntry == null) {
             return instance;
+        }
+        String bean = chatScopeEntry.beans.get(beanId);
+        if (bean == null) {
+            return instance;
+        }
+        try {
+            return JsonPassivation.mapper.readerForUpdating(instance).readValue(bean);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

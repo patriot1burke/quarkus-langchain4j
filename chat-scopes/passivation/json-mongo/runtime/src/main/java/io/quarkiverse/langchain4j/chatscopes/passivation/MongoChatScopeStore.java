@@ -1,8 +1,6 @@
 package io.quarkiverse.langchain4j.chatscopes.passivation;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.Document;
 
@@ -28,31 +26,16 @@ public class MongoChatScopeStore extends AbstractJsonChatScopeStore implements C
 
     final ObjectMapper mapper = new ObjectMapper();
 
-    ConcurrentHashMap<String, ChatScopeRepresentation> chatScopeEntries = new ConcurrentHashMap<>();
-
     @Override
-    public void save(Map<String, ChatScopeRepresentation> scopes) {
-        for (Map.Entry<String, ChatScopeRepresentation> entry : scopes.entrySet()) {
-            ChatScopeRepresentation chatScopeEntry = chatScopeEntries.computeIfAbsent(entry.getKey(),
-                    ChatScopeRepresentation::new);
-            synchronized (chatScopeEntry) {
-                chatScopeEntry.parent = entry.getValue().parent;
-                chatScopeEntry.route = entry.getValue().route;
-                chatScopeEntry.beans.putAll(entry.getValue().beans);
-                try {
-                    String val = mapper.writeValueAsString(chatScopeEntry);
-                    Document document = new Document()
-                            .append(ID_FIELD, entry.getKey())
-                            .append(CONTEXT_STATE_FIELD, val);
-                    collection.replaceOne(
-                            Filters.eq(ID_FIELD, entry.getKey()),
-                            document,
-                            new ReplaceOptions().upsert(true));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+    protected void write(ChatScopeRepresentation chatScopeEntry) throws Exception {
+        String val = mapper.writeValueAsString(chatScopeEntry);
+        Document document = new Document()
+                .append(ID_FIELD, chatScopeEntry.id)
+                .append(CONTEXT_STATE_FIELD, val);
+        collection.replaceOne(
+                Filters.eq(ID_FIELD, chatScopeEntry.id),
+                document,
+                new ReplaceOptions().upsert(true));
     }
 
     @Override
@@ -76,19 +59,6 @@ public class MongoChatScopeStore extends AbstractJsonChatScopeStore implements C
             }
         });
         return entry;
-    }
-
-    @Override
-    public Object activateBean(ChatScope scope, String beanId, Object instance) {
-        ChatScopeRepresentation chatScopeEntry = chatScopeEntries.get(scope.getId());
-        if (chatScopeEntry == null) {
-            return instance;
-        }
-        String bean = chatScopeEntry.beans.get(beanId);
-        if (bean == null) {
-            return instance;
-        }
-        return activateBean(instance, bean);
     }
 
     @Override
