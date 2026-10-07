@@ -206,8 +206,8 @@ ifndef::add-copy-button-to-env-var[]
 Environment variable: `+++QUARKUS_LANGCHAIN4J_GENERIC_SCHEMA_MANAGEMENT_STRATEGY+++`
 endif::add-copy-button-to-env-var[]
 --
-a|`none`, `create`, `drop-and-create`, `drop`, `update`, `validate`
-|`+++none+++`
+a|tooltip:none[No schema action.], tooltip:create[Create the schema.], tooltip:drop-and-create[Drop and then recreate the schema.], tooltip:drop[Drop the schema.], tooltip:update[Update (alter) the database schema.], tooltip:validate[Validate the database schema.]
+|tooltip:none[No schema action.]
 
 
 |===

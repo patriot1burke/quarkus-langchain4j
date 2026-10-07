@@ -7,9 +7,9 @@ import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassType;
 import org.jboss.jandex.DotName;
 
-import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import io.quarkiverse.langchain4j.chatscopes.passivation.RedisJsonChatScopeStore;
 import io.quarkiverse.langchain4j.chatscopes.passivation.RedisJsonChatScopeStoreRecorder;
+import io.quarkiverse.langchain4j.chatscopes.spi.ChatScopeStore;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.SyntheticBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -47,12 +47,13 @@ public class RedisJsonProcessor {
         }
         beanProducer.produce(SyntheticBeanBuildItem
                 .configure(REDIS_JSON_CHAT_SCOPE_STORE)
-                .types(ClassType.create(ChatMemoryStore.class))
+                .types(ClassType.create(ChatScopeStore.class))
                 .setRuntimeInit()
                 .scope(ApplicationScoped.class)
                 .addInjectionPoint(ClassType.create(DotName.createSimple(RedisDataSource.class)),
                         redisClientQualifier)
                 .createWith(recorder.chatMemoryStoreFunction(clientName))
+                .unremovable()
                 .done());
     }
 }

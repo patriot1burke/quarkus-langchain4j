@@ -15,13 +15,16 @@ import io.quarkiverse.langchain4j.chatscopes.ChatScope;
 import io.quarkiverse.langchain4j.chatscopes.ChatScoped;
 import io.quarkiverse.langchain4j.chatscopes.internal.ChatScopeManagedContext;
 import io.quarkus.test.QuarkusUnitTest;
+import io.quarkus.test.common.QuarkusTestResource;
 
+@QuarkusTestResource(RedisTestResource.class)
 public class PassivationTest {
     @RegisterExtension
     static final QuarkusUnitTest unitTest = new QuarkusUnitTest()
             .setArchiveProducer(
                     () -> ShrinkWrap.create(JavaArchive.class).addClasses(
-                            CounterBean.class, AppScopedCounter.class, SingletonCounter.class));
+                            CounterBean.class, AppScopedCounter.class, SingletonCounter.class))
+            .overrideConfigKey("quarkus.redis.hosts", "${quarkus.redis.tr}");
 
     @Singleton
     public static class SingletonCounter {
@@ -94,7 +97,7 @@ public class PassivationTest {
     @Inject
     SingletonCounter singletonCounter;
 
-    //@Test
+    @Test
     public void testPassivation() throws Exception {
         ChatScope.begin();
         String id = ChatScope.id();

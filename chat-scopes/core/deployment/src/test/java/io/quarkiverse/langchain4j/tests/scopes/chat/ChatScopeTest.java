@@ -36,6 +36,15 @@ public class ChatScopeTest {
     @Inject
     ScopedCounterBean scopedCounterBean;
 
+    {
+        ChatScope.begin();
+        String id = ChatScope.id();
+        ChatScope.deactivate();
+        // reactivate
+        ChatScope.activate(id);
+
+    }
+
     @Test
     public void testScopedCounterBeanInherited() {
         try {
