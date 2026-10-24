@@ -142,9 +142,11 @@ public class AgenticRecorder {
                 ChatModel chatModel = info.chatModelInfo().resolve(cdiContext);
 
                 Class<?> agentClass = loadClassSafe(info);
-                Object agent = AgenticServices.createAgenticSystem(agentClass, chatModel,
+                var builder = DeclarativeAgenticServices.createAgenticSystem(agentClass, chatModel,
                         new AgentConfigurator(new QuarkusAgenticContextConsumer(cdiContext, info),
                                 QuarkusSubAgentResolver.INSTANCE, AGENT_INSTANCE_FACTORY));
+                AgenticServiceBeanKit.augment(agentClass, builder, cdiContext);
+                Object agent = builder.build();
 
                 if (info.hasInterceptorBindings()) {
                     Object originalAgent = agent;
